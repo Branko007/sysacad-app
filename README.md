@@ -856,3 +856,413 @@ El objetivo de este paso fue **verificar que todos los componentes clave del ent
 - **Que la estructura del proyecto respeta buenas prácticas.**
     
     La lógica de conexión está separada en un módulo (`src/config/db.js`), lo que mejora el orden y facilita el mantenimiento del código.
+    
+
+## 🏛️ 4. Arquitectura por capas para Usuarios (Node.js + Express + Sequelize + Postgres)
+
+### ¿Por qué dividir en ruta, controlador, servicio, repositorio, modelo, entidad/DTO y validador?
+
+**Objetivos de ingeniería**
+
+- **Separación de responsabilidades (SoC)**: cada archivo hace una sola cosa y la hace bien.
+- **Principios SOLID**
+    - *S*: clases/módulos con una responsabilidad clara.
+    - *D*: alto nivel (controlador/servicio) no depende de detalles (Sequelize) sino de abstracciones (repositorio).
+- **Testabilidad**: con mocks podés testear servicio y controlador sin DB real. Las integraciones prueban el stack completo.
+- **Mantenibilidad y escalabilidad**: cambios en una capa no rompen las demás (p. ej., migrar Sequelize ⇄ Prisma afecta casi solo el repositorio/modelo).
+- **Seguridad**: la **entidad/DTO** controla qué sale por la API (no devolvemos `password`).
+- **Trazabilidad**: cada error se ubica rápido (sabes si fue en ruta, controlador, servicio o DB).
+
+---
+
+### Capas: responsabilidades y “no-responsabilidades”
+
+- **Ruta (`routes`)**
+    
+    Enlaza URL/HTTP → función del **controlador**.
+    
+    ❌ No contiene lógica de negocio ni SQL.
+    
+- **Controlador (`controllers`)**
+    
+    Orquesta la petición (toma `req`, llama al servicio, arma `res`).
+    
+    ❌ No accede a la DB ni decide reglas complejas.
+    
+- **Servicio (`services`)**
+    
+    Lógica de negocio: validaciones cruzadas, hashing, reglas del dominio.
+    
+    ❌ No ejecuta queries directas.
+    
+- **Repositorio (`repositories`)**
+    
+    Acceso a datos: usa **modelos Sequelize** para leer/escribir.
+    
+    ❌ No conoce HTTP ni reglas de negocio.
+    
+- **Modelo (`models`)**
+    
+    Mapeo ORM ↔ tabla (Sequelize).
+    
+    ❌ No decide reglas ni formatea respuestas.
+    
+- **Entidad/DTO (`entities`)**
+    
+    “Vista lógica” del dominio para **responder** (sin campos sensibles).
+    
+    ❌ No contiene queries ni lógica de negocio.
+    
+- **Validador (`validators`)**
+    
+    Valida payloads de entrada (Joi).
+    
+    ❌ No hace side-effects ni queries.
+    
+- **Middlewares (`middlewares`)**
+    
+    Cross-cutting concerns (manejo de errores, auth, async handler, logging).
+    
+
+---
+
+### Flujo “Listar usuarios”: visión simple
+
+1. Cliente hace `GET /api/usuarios`.
+2. **Ruta** deriva al **controlador**.
+3. **Controlador** llama al **servicio**.
+4. **Servicio** pide datos al **repositorio**.
+5. **Repositorio** usa el **modelo Sequelize** para consultar la **DB**.
+6. **Servicio** transforma a **Entidad/DTO** (oculta `password`).
+7. **Controlador** responde `200 OK` con JSON.
+
+![capas.png](capas.png)
+
+### 1) Modelo (Sequelize) – `models/Usuario.js`
+
+Mapea la tabla real.
+
+```jsx
+// src/models/Usuario.js
+import { DataTypes } from 'sequelize';
+import sequelize from '../config/db.js';
+
+const Usuario = sequelize.define('Usuario', {
+  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+  nombre: { type: DataTypes.STRING, allowNull: false },
+  email: {
+    type: DataTypes.STRING, allowNull: false, unique: true, validate: { isEmail: true }
+  },
+  password: { type: DataTypes.STRING, allowNull: false },
+  rol: { type: DataTypes.ENUM('admin', 'profesor', 'alumno'), allowNull: false },
+}, {
+  tableName: 'usuarios',
+  timestamps: false,
+});
+
+export default Usuario;
+```
+
+### 2) Entidad (DTO) – `entities/usuario.entity.js`
+
+Representa el objeto de dominio (y controla qué exponer).
+
+```jsx
+// src/entities/usuario.entity.js
+export class UsuarioEntity {
+  constructor({ id, nombre, email, rol }) {
+    this.id = id;
+    this.nombre = nombre;
+    this.email = email;
+    this.rol = rol;
+  }
+
+  // Fábrica desde modelo Sequelize
+  static fromModel(modelInstance) {
+    const { id, nombre, email, rol } = modelInstance;
+    return new UsuarioEntity({ id, nombre, email, rol });
+  }
+
+  // Serialización para respuesta
+  toJSON() {
+    return { id: this.id, nombre: this.nombre, email: this.email, rol: this.rol };
+  }
+}
+
+```
+
+### 3) Repositorio – `repositories/usuario.repository.js`
+
+Capa de acceso a datos, centraliza queries.
+
+```jsx
+// src/repositories/usuario.repository.js
+import Usuario from '../models/Usuario.js';
+
+export class UsuarioRepository {
+  async findAll() {
+    return Usuario.findAll();
+  }
+
+  async findById(id) {
+    return Usuario.findByPk(id);
+  }
+
+  async findByEmail(email) {
+    return Usuario.findOne({ where: { email } });
+  }
+
+  async create({ nombre, email, password, rol }) {
+    return Usuario.create({ nombre, email, password, rol });
+  }
+
+  async update(id, data) {
+    const user = await Usuario.findByPk(id);
+    if (!user) return null;
+    return user.update(data);
+  }
+
+  async remove(id) {
+    return Usuario.destroy({ where: { id } });
+  }
+}
+
+```
+
+### 4) Servicio – `services/usuario.service.js`
+
+Reglas de negocio (hash de password, validaciones cruzadas, etc.).
+
+```jsx
+// src/services/usuario.service.js
+import bcrypt from 'bcrypt';
+import { UsuarioRepository } from '../repositories/usuario.repository.js';
+import { UsuarioEntity } from '../entities/usuario.entity.js';
+
+export class UsuarioService {
+  constructor(repo = new UsuarioRepository()) {
+    this.repo = repo;
+  }
+
+  async listar() {
+    const rows = await this.repo.findAll();
+    return rows.map(UsuarioEntity.fromModel).map(u => u.toJSON());
+  }
+
+  async obtener(id) {
+    const row = await this.repo.findById(id);
+    return row ? UsuarioEntity.fromModel(row).toJSON() : null;
+  }
+
+  async crear({ nombre, email, password, rol }) {
+    const exists = await this.repo.findByEmail(email);
+    if (exists) throw new Error('El email ya está registrado');
+
+    const hashed = await bcrypt.hash(password, 10);
+    const created = await this.repo.create({ nombre, email, password: hashed, rol });
+    return UsuarioEntity.fromModel(created).toJSON();
+  }
+
+  async actualizar(id, { nombre, email, password, rol }) {
+    const data = { nombre, email, rol };
+    if (password) data.password = await bcrypt.hash(password, 10);
+    const updated = await this.repo.update(id, data);
+    return updated ? UsuarioEntity.fromModel(updated).toJSON() : null;
+  }
+
+  async eliminar(id) {
+    await this.repo.remove(id);
+    return true;
+  }
+}
+```
+
+### 5) Controlador – `controllers/usuario.controller.js`
+
+Traduce HTTP ↔ servicio. No tiene lógica de negocio.
+
+```jsx
+// src/controllers/usuario.controller.js
+import { UsuarioService } from '../services/usuario.service.js';
+
+const service = new UsuarioService();
+
+export const listarUsuarios = async (req, res) => {
+  const data = await service.listar();
+  res.json(data);
+};
+
+export const obtenerUsuario = async (req, res) => {
+  const data = await service.obtener(Number(req.params.id));
+  if (!data) return res.status(404).json({ error: 'Usuario no encontrado' });
+  res.json(data);
+};
+
+export const crearUsuario = async (req, res) => {
+  const data = await service.crear(req.body);
+  res.status(201).json(data);
+};
+
+export const actualizarUsuario = async (req, res) => {
+  const data = await service.actualizar(Number(req.params.id), req.body);
+  if (!data) return res.status(404).json({ error: 'Usuario no encontrado' });
+  res.json(data);
+};
+
+export const eliminarUsuario = async (req, res) => {
+  await service.eliminar(Number(req.params.id));
+  res.status(204).send();
+};
+
+```
+
+### 6) Validador (Joi) – `validators/usuario.validator.js`
+
+Valida payloads de entrada.
+
+```jsx
+// src/validators/usuario.validator.js
+import Joi from 'joi';
+
+export const crearUsuarioSchema = Joi.object({
+  nombre: Joi.string().min(2).max(80).required(),
+  email: Joi.string().email().required(),
+  password: Joi.string().min(8).required(),
+  rol: Joi.string().valid('admin', 'profesor', 'alumno').required(),
+});
+
+export const actualizarUsuarioSchema = Joi.object({
+  nombre: Joi.string().min(2).max(80),
+  email: Joi.string().email(),
+  password: Joi.string().min(8),
+  rol: Joi.string().valid('admin', 'profesor', 'alumno'),
+}).min(1);
+
+export function validate(schema) {
+  return (req, res, next) => {
+    const { error, value } = schema.validate(req.body, { abortEarly: false, stripUnknown: true });
+    if (error) return res.status(400).json({ error: 'Validación', details: error.details.map(d => d.message) });
+    req.body = value;
+    next();
+  };
+}
+
+```
+
+### 7) Middleware asincrónico – `middlewares/asyncHandler.js`
+
+Evita try/catch repetidos.
+
+```jsx
+// src/middlewares/asyncHandler.js
+export const asyncHandler = fn => (req, res, next) =>
+  Promise.resolve(fn(req, res, next)).catch(next);
+
+```
+
+### 8) Rutas – `routes/usuarios.routes.js`
+
+Enlaza ruta → controlador, con validación.
+
+```jsx
+// src/routes/usuarios.routes.js
+import { Router } from 'express';
+import { asyncHandler } from '../middlewares/asyncHandler.js';
+import {
+  listarUsuarios, obtenerUsuario, crearUsuario, actualizarUsuario, eliminarUsuario
+} from '../controllers/usuario.controller.js';
+import { validate, crearUsuarioSchema, actualizarUsuarioSchema } from '../validators/usuario.validator.js';
+
+const router = Router();
+
+router.get('/', asyncHandler(listarUsuarios));
+router.get('/:id', asyncHandler(obtenerUsuario));
+router.post('/', validate(crearUsuarioSchema),     asyncHandler(crearUsuario));
+router.put('/:id', validate(actualizarUsuarioSchema), asyncHandler(actualizarUsuario));
+router.delete('/:id', asyncHandler(eliminarUsuario));
+
+export default router;
+
+```
+
+### 9) Integración en `app.js`
+
+Registra las rutas y maneja errores.
+
+```jsx
+// src/app.js
+import express from 'express';
+import morgan from 'morgan';
+import usuariosRouter from './routes/usuarios.routes.js';
+
+const app = express();
+app.use(express.json());
+app.use(morgan('dev'));
+
+app.use('/api/usuarios', usuariosRouter);
+
+app.get('/', (_req, res) => res.send('Sistema Académico en funcionamiento'));
+
+// Manejo básico de errores
+// eslint-disable-next-line no-unused-vars
+app.use((err, _req, res, _next) => {
+  console.error('Unhandled Error:', err);
+  res.status(500).json({ error: 'Error interno del servidor' });
+});
+
+export default app;
+
+```
+
+### Tips y pruebas rápidas
+
+- Crear usuario (POST):
+
+```
+POST /api/usuarios
+Content-Type: application/json
+
+{
+  "nombre": "Branko",
+  "email": "branko@utn.edu.ar",
+  "password": "MiPassSegura123",
+  "rol": "admin"
+}
+
+```
+
+- Listar:
+
+```
+GET /api/usuarios
+```
+
+- Obtener:
+
+```
+GET /api/usuarios/1
+```
+
+- Actualizar:
+
+```
+PUT /api/usuarios/1
+{ "nombre": "Branko A." }
+```
+
+- Eliminar:
+
+```
+DELETE /api/usuarios/1
+```
+
+---
+
+Con esto tenemos:
+
+- **Modelo (Sequelize)** para la persistencia,
+- **Repositorio** para aislar queries,
+- **Servicio** con la lógica (hash, validaciones de negocio),
+- **Controlador** delgado,
+- **Ruta** limpia con **validadores**,
+- **Entidad/DTO** para controlar lo que devolvés (sin password).
