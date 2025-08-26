@@ -80,16 +80,43 @@ En `package.json`:
 
 ## 📡 Endpoints disponibles
 
-Base URL por defecto: **http://localhost:3000**  
+**Base URL por defecto:** `http://localhost:3000`  
 
 ### 👥 Usuarios
-| Método | Endpoint            | Descripción                           | Body (JSON ejemplo) |
-|--------|---------------------|---------------------------------------|---------------------|
-| GET    | `/api/usuarios`     | Lista todos los usuarios              | - |
-| GET    | `/api/usuarios/:id` | Obtiene un usuario por ID             | - |
-| POST   | `/api/usuarios`     | Crea un nuevo usuario                 | ```{ "nombre": "Juan", "email": "juan@test.com", "password": "ClaveSegura123", "rol": "alumno" }``` |
-| PUT    | `/api/usuarios/:id` | Actualiza datos de un usuario existente | ```{ "nombre": "Juan Actualizado", "rol": "profesor" }``` |
-| DELETE | `/api/usuarios/:id` | Elimina un usuario por ID             | - |
+| Método | Endpoint            | Descripción                               | Body (JSON ejemplo) |
+|--------|---------------------|-------------------------------------------|---------------------|
+| GET    | `/api/usuarios`     | Lista todos los usuarios                  | - |
+| GET    | `/api/usuarios/:id` | Obtiene un usuario por ID                 | - |
+| POST   | `/api/usuarios`     | Crea un nuevo usuario                     | ```{ "nombre": "Juan", "email": "juan@test.com", "password": "ClaveSegura123", "rol": "alumno" }``` |
+| PUT    | `/api/usuarios/:id` | Actualiza datos de un usuario existente   | ```{ "nombre": "Juan Actualizado", "rol": "profesor" }``` |
+| DELETE | `/api/usuarios/:id` | Elimina un usuario por ID                 | - |
+
+---
+
+### 📄 Analíticos (PDF)
+
+> Generación on-the-fly de analítico de un alumno en formato **PDF**.  
+> Asegúrate de haber agregado la ruta en `src/app.js`:  
+> `app.use('/api/analiticos', analiticosRouter);`
+
+| Método | Endpoint                          | Descripción                           | Headers / Respuesta |
+|--------|-----------------------------------|---------------------------------------|---------------------|
+| GET    | `/api/analiticos/:alumnoId.pdf`   | Devuelve el Analítico del alumno en PDF | **Response**: `Content-Type: application/pdf` |
+
+**Ejemplos de uso (Postman):**  
+1. Método: `GET`  
+2. URL: `http://localhost:3000/api/analiticos/123.pdf`  
+3. Headers: *(no requiere especiales)*  
+4. **Respuesta**: mostrará/descargará `analitico_123.pdf` (inline).
+
+**Ejemplo cURL:**
+```bash
+curl -X GET "http://localhost:3000/api/analiticos/123.pdf" -o analitico_123.pdf
+```
+
+> **Notas**
+> - Si el `alumnoId` no existe, el endpoint responde `404 { "error": "Alumno no encontrado" }`.
+> - Si deseas forzar descarga en lugar de inline, cambia el header `Content-Disposition` a `attachment` en el controlador.
 
 ---
 
@@ -104,33 +131,31 @@ Base URL por defecto: **http://localhost:3000**
    - Crear una nueva colección llamada **Sysacad App**.  
    - Definir la variable `base_url = http://localhost:3000`.  
 
-3. **Ejemplo de request para crear un usuario**:  
-   - Método: `POST`  
-   - URL: `{{base_url}}/api/usuarios`  
-   - Body (JSON → raw):  
-     ```json
-     {
-       "nombre": "María López",
-       "email": "maria@example.com",
-       "password": "ClaveSegura123",
-       "rol": "profesor"
-     }
-     ```
+3. **Usuarios — Crear** (POST `{{base_url}}/api/usuarios`)  
+   **Body (raw JSON):**
+   ```json
+   {
+     "nombre": "María López",
+     "email": "maria@example.com",
+     "password": "ClaveSegura123",
+     "rol": "profesor"
+   }
+   ```
 
-4. **Ejemplo de update**:  
-   - Método: `PUT`  
-   - URL: `{{base_url}}/api/usuarios/1`  
-   - Body:  
-     ```json
-     {
-       "nombre": "María Actualizada",
-       "rol": "admin"
-     }
-     ```
+4. **Usuarios — Update** (PUT `{{base_url}}/api/usuarios/1`)  
+   **Body:**
+   ```json
+   {
+     "nombre": "María Actualizada",
+     "rol": "admin"
+   }
+   ```
 
-5. **Ejemplo de delete**:  
-   - Método: `DELETE`  
-   - URL: `{{base_url}}/api/usuarios/1`  
+5. **Usuarios — Delete** (DELETE `{{base_url}}/api/usuarios/1`)
+
+6. **Analíticos — Descargar PDF** (GET `{{base_url}}/api/analiticos/123.pdf`)  
+   - Respuesta: PDF del analítico.  
+   - En Postman, pestaña **“Save Response”** para guardar el archivo si lo necesitás.
 
 ---
 
