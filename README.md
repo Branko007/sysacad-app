@@ -2,9 +2,9 @@
 
 👨‍💻 **Desarrollado por:**
 
-- Branko Almeira
-- Federico Sosa
-- Agustin Giorlando
+- Branko Almeira  
+- Federico Sosa  
+- Agustin Giorlando  
 
 Aplicación académica desarrollada en **Node.js** con **Express** y **Sequelize**, conectada a **PostgreSQL** (Docker).  
 El proyecto implementa una arquitectura **modular por capas** que favorece la escalabilidad, mantenibilidad y testabilidad.
@@ -32,13 +32,13 @@ src/
 
 ## 🚀 Tecnologías principales
 
-- **Node.js** v20+
-- **Express.js** (framework web)
-- **Sequelize ORM**
-- **PostgreSQL 15** (contenedor Docker)
-- **Jest + Supertest** (testing)
-- **Docker Compose** (infraestructura reproducible)
-- **dotenv** (gestión de configuración)
+- **Node.js** v20+  
+- **Express.js** (framework web)  
+- **Sequelize ORM**  
+- **PostgreSQL 15** (contenedor Docker)  
+- **Jest + Supertest** (testing)  
+- **Docker Compose** (infraestructura reproducible)  
+- **dotenv** (gestión de configuración)  
 
 ---
 
@@ -72,28 +72,82 @@ Esto levanta un contenedor PostgreSQL en el puerto **5433** de tu host, aislando
 
 En `package.json`:
 
-- `npm run dev` → inicia el servidor con nodemon.
-- `npm start` → inicia el servidor en modo producción.
-- `npm test` → ejecuta la suite de tests con Jest.
+- `npm run dev` → inicia el servidor con nodemon.  
+- `npm start` → inicia el servidor en modo producción.  
+- `npm test` → ejecuta la suite de tests con Jest.  
 
 ---
 
-## 📡 Endpoints iniciales
+## 📡 Endpoints disponibles
 
-- `GET /` → estado de la aplicación.
-- `GET /api/usuarios` → devuelve lista de usuarios (sin contraseñas).
+Base URL por defecto: **http://localhost:3000**  
 
-*(Próximamente: autenticación JWT, CRUD completo de entidades académicas, validaciones, etc.)*
+### 👥 Usuarios
+| Método | Endpoint            | Descripción                           | Body (JSON ejemplo) |
+|--------|---------------------|---------------------------------------|---------------------|
+| GET    | `/api/usuarios`     | Lista todos los usuarios              | - |
+| GET    | `/api/usuarios/:id` | Obtiene un usuario por ID             | - |
+| POST   | `/api/usuarios`     | Crea un nuevo usuario                 | ```{ "nombre": "Juan", "email": "juan@test.com", "password": "ClaveSegura123", "rol": "alumno" }``` |
+| PUT    | `/api/usuarios/:id` | Actualiza datos de un usuario existente | ```{ "nombre": "Juan Actualizado", "rol": "profesor" }``` |
+| DELETE | `/api/usuarios/:id` | Elimina un usuario por ID             | - |
+
+---
+
+## 🔎 Cómo probar con Postman
+
+1. **Levantar la app**:  
+   ```bash
+   npm run dev
+   ```
+
+2. **Configurar colección en Postman**:  
+   - Crear una nueva colección llamada **Sysacad App**.  
+   - Definir la variable `base_url = http://localhost:3000`.  
+
+3. **Ejemplo de request para crear un usuario**:  
+   - Método: `POST`  
+   - URL: `{{base_url}}/api/usuarios`  
+   - Body (JSON → raw):  
+     ```json
+     {
+       "nombre": "María López",
+       "email": "maria@example.com",
+       "password": "ClaveSegura123",
+       "rol": "profesor"
+     }
+     ```
+
+4. **Ejemplo de update**:  
+   - Método: `PUT`  
+   - URL: `{{base_url}}/api/usuarios/1`  
+   - Body:  
+     ```json
+     {
+       "nombre": "María Actualizada",
+       "rol": "admin"
+     }
+     ```
+
+5. **Ejemplo de delete**:  
+   - Método: `DELETE`  
+   - URL: `{{base_url}}/api/usuarios/1`  
 
 ---
 
 ## 🧪 Testing
 
-- **Unit tests**: validan la lógica de negocio y servicios con dependencias mockeadas.
-- **Integration tests**: prueban rutas HTTP completas con base de datos real/efímera.
+- **Unit tests**: validan la lógica de negocio y servicios con dependencias mockeadas.  
+- **Integration tests**: prueban rutas HTTP completas con base de datos real/efímera.  
 
 Ejecutar:
 
 ```bash
 npm test
 ```
+
+---
+
+## ✅ Mejoras futuras
+
+- Implementar autenticación con JWT (cookies httpOnly).  
+- Incorporar más entidades académicas (materias, facultades, inscripciones, calificaciones).  

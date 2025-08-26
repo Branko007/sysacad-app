@@ -1,4 +1,3 @@
-// src/services/usuario.service.js
 import bcrypt from 'bcrypt';
 import { UsuarioRepository } from '../repositories/usuario.repository.js';
 import { UsuarioEntity } from '../entities/usuario.entity.js';

@@ -1,4 +1,3 @@
-// src/controllers/usuario.controller.js
 import { UsuarioService } from '../services/usuario.service.js';
 
 const service = new UsuarioService();
