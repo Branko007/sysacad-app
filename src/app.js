@@ -3,6 +3,9 @@ import express from 'express';
 import morgan from 'morgan';
 import usuariosRouter from './routes/usuarios.routes.js';
 import analiticosRouter from './routes/analiticos.routes.js';
+import alumnoRoutes from './routes/alumnos.routes.js';
+
+
 
 const app = express();
 app.use(express.json());
@@ -10,6 +13,7 @@ app.use(morgan('dev'));
 
 app.use('/api/usuarios', usuariosRouter);
 app.use('/api/analiticos', analiticosRouter);
+app.use('/api', alumnoRoutes);
 
 app.get('/', (_req, res) => res.send('Sistema Académico en funcionamiento'));
 
