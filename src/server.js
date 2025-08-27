@@ -1,13 +1,6 @@
 import app from './app.js';
-import dotenv from 'dotenv';
+import { env } from './config/env.js';
 
-
-// Cargar variables de entorno
-dotenv.config();
-
-const PORT = process.env.PORT || 3000;
-
-// Levantar servidor
-app.listen(PORT, () => {
-    console.log(`Servidor corriendo en http://localhost:${PORT}`);
-  });  
+app.listen(env.port, () => {
+  console.log(`🚀 Servidor corriendo en http://localhost:${env.port}`);
+});
