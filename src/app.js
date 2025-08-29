@@ -4,6 +4,7 @@ import morgan from 'morgan';
 import usuariosRouter from './routes/usuarios.routes.js';
 import analiticosRouter from './routes/analiticos.routes.js';
 import alumnoRoutes from './routes/alumnos.routes.js';
+import authRoutes from './routes/auth.routes.js';
 
 
 
@@ -11,6 +12,7 @@ const app = express();
 app.use(express.json());
 app.use(morgan('dev'));
 
+app.use('/api/auth', authRoutes)
 app.use('/api/usuarios', usuariosRouter);
 app.use('/api/analiticos', analiticosRouter);
 app.use('/api', alumnoRoutes);
