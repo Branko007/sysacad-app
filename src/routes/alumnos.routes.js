@@ -1,26 +1,19 @@
-
 import { Router } from 'express';
-import { AlumnoEntity } from '../entities/alumno.entity.js';
+import { asyncHandler } from '../middlewares/asyncHandler.js';
+import { authenticateToken } from '../middlewares/auth.middleware.js';
+import {
+  listarAlumnos, obtenerAlumno, crearAlumno, actualizarAlumno, eliminarAlumno
+} from '../controllers/alumno.controller.js';
+import { validate, crearAlumnoSchema, actualizarAlumnoSchema } from '../validators/alumno.validator.js';
 
 const router = Router();
 
+router.use(authenticateToken);
 
-router.get('/alumnos/:legajo', (req, res) => {
-  const { legajo } = req.params;
-
-  // Datos hardcodeados 
-  const alumnos = [
-    new AlumnoEntity({ legajo: '7185', apellido: 'Almeira',  nombre: 'Branko',  facultad: 'UTN San Rafael' }),
-    new AlumnoEntity({ legajo: '7662', apellido: 'Fede',  nombre: 'Sosa', facultad: 'UTN San Rafael' }),
-  ];
-
-  const alumno = alumnos.find(a => a.legajo === legajo);
-
-  if (!alumno) {
-    return res.status(404).json({ error: 'Alumno no encontrado' });
-  }
-
-  res.json(alumno);
-});
+router.get('/', asyncHandler(listarAlumnos));
+router.get('/:id', asyncHandler(obtenerAlumno));
+router.post('/', validate(crearAlumnoSchema), asyncHandler(crearAlumno));
+router.put('/:id', validate(actualizarAlumnoSchema), asyncHandler(actualizarAlumno));
+router.delete('/:id', asyncHandler(eliminarAlumno));
 
 export default router;

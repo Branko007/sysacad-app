@@ -31,4 +31,8 @@ export class PersonaEntity {
             email: this.email
         };
     }
+
+    getNombreCompleto() {
+        return `${this.apellido}, ${this.nombre}`;
+    }
 }

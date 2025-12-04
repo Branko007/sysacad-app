@@ -19,7 +19,7 @@ app.use('/api/auth', authRoutes)
 app.use('/api/usuarios', usuariosRouter);
 app.use('/api/analiticos', analiticosRouter);
 app.use('/api/personas', personasRouter);
-app.use('/api', alumnoRoutes);
+app.use('/api/alumnos', alumnoRoutes);
 
 app.get('/', (_req, res) => res.send('Sistema Académico en funcionamiento'));
 
