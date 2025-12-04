@@ -1,0 +1,305 @@
+@startuml
+' Definición de paquete Personas
+package "Personas" {
+    class Persona {
+        -id: int
+        -apellido: str
+        -nombre: str
+        -nroDocumento: str
+        -tipoDocumento: TipoDocumento
+        -fechaNacimiento: date
+        -genero: str
+        -direccion: str
+        -telefono: str
+        -email: str
+    }
+
+    class Usuario {
+        -nombreUsuario: str
+        -contraseña: str
+        -rol: Rol
+    }
+
+    class Alumno {
+        -nroLegajo: int
+        -fechaIngreso: date
+        -regularidad: boolean
+        -cohorte: int
+    }
+
+    class Profesor {
+        -legajo: int
+        -fechaIngreso: date
+        -especialidad: str
+        -antigüedad: int
+    }
+
+    class Administrativo {
+        -legajo: int
+        -fechaIngreso: date
+        -area: str
+    }
+
+    class Autoridad {
+        -fechaInicio: date
+        -fechaFin: date
+        -resolucion: str
+    }
+
+    enum TipoDocumento {
+        dni
+        libretaCivica
+        libretaEnrolamiento
+        pasaporte
+    }
+
+    enum Rol {
+        alumno
+        profesor
+        administrador
+        autoridad
+        moderador
+        
+    }
+
+    Persona <|-- Usuario
+    Persona <|-- Alumno
+    Persona <|-- Profesor
+    Persona <|-- Administrativo
+    Persona <|-- Autoridad
+}
+
+' Definición de paquete Académico
+package "Academico" {
+    class Universidad {
+        -nombre: str
+        -sigla: str
+        -direccion: str
+        -telefono: str
+        -sitioWeb: str
+    }
+
+    class Facultad {
+        -nombre: str
+        -abreviatura: str
+        -directorio: str
+        -sigla: str
+        -codigoPostal: str
+        -ciudad: str
+        -domicilio: str
+        -telefono: str
+        -contacto: str
+        -email: str
+    }
+
+    class Departamento {
+        -nombre: str
+        -abreviatura: str
+        -ubicacion: str
+        -email: str
+        -telefono: str
+    }
+
+    class Area {
+        -nombre: str
+        -descripcion: str
+        -ubicacion: str
+    }
+
+    class Especialidad {
+        -nombre: str
+        -letra: str
+        -observacion: str
+    }
+
+    class TipoEspecialidad {
+        -nombre: str
+        -nivel: str
+        -descripcion: str
+    }
+
+    class Carrera {
+        -nombre: str
+        -codigo: str
+        -duracionAnios: int
+        -titulo: str
+        -nivel: str
+        -estado: str
+    }
+
+    class Plan {
+        -nombre: str
+        -codigo: str
+        -fechaInicio: date
+        -fechaFin: date
+        -observacion: str
+        -resolucion: str
+        -activo: boolean
+    }
+
+    class Orientacion {
+        -nombre: str
+        -descripcion: str
+        -codigo: str
+    }
+
+    class Grado {
+        -nombre: str
+        -nivel: str
+    }
+
+    class Materia {
+        -nombre: str
+        -codigo: str
+        -cargaHoraria: int
+        -creditos: int
+        -anio: int
+        -cuatrimestre: int
+        -observacion: str
+        -modalidad: str
+    }
+
+    class Clase {
+        -fecha: date
+        -horaInicio: time
+        -horaFin: time
+        -tema: str
+        -modalidad: str
+        -ubicacion: str
+    }
+
+    class Inscripcion {
+        -id: int
+        -fechaInscripcion: date
+        -aprobada: boolean
+        -observaciones: str
+        -cicloLectivo: int
+        -periodo: str
+    }
+
+    class Analitico {
+        -id: int
+        -fechaGeneracion: date
+        -oficial: boolean
+        -promedio: float
+        -cantidadMaterias: int
+    }
+
+    class Evaluacion {
+        -id: int
+        -tipo: str
+        -fecha: date
+        -descripcion: str
+        -ponderacion: float
+    }
+
+    class Calificacion {
+        -id: int
+        -nota: float
+        -fechaRegistro: date
+        -observaciones: str
+        -estado: str
+    }
+
+    class Asistencia {
+        -id: int
+        -fecha: date
+        -presente: boolean
+        -observaciones: str
+        -justificada: boolean
+    }
+
+    class Material {
+        -id: int
+        -titulo: str
+        -tipo: str
+        -fechaPublicacion: date
+        -url: str
+        -descripcion: str
+        -tamanio: int
+    }
+
+    class Formulario {
+        -id: int
+        -titulo: str
+        -fechaApertura: date
+        -fechaCierre: date
+        -activo: boolean
+        -descripcion: str
+    }
+
+    class Examen {
+        -id: int
+        -tipo: str
+        -fecha: date
+        -aula: str
+        -duracion: int
+        -estado: str
+    }
+
+    ' Relaciones dentro del paquete Académico
+    Universidad "1" -- "1..*" Facultad
+    Facultad "1" -- "1..*" Departamento
+    Facultad "1" -- "1..*" Carrera
+    Departamento "1" -- "0..*" Area
+    Carrera "1" -- "1..*" Plan
+    Carrera "1" -- "0..*" Orientacion
+    Especialidad -- TipoEspecialidad
+}
+
+' Definición de paquete Gestión
+package "Gestion" {
+    class Cargo {
+        -nombre: str
+        -puntos: int
+        -descripcion: str
+    }
+
+    class CategoriaCargo {
+        -nombre: str
+        -nivel: int
+        -descripcion: str
+    }
+
+    class TipoDedicacion {
+        -nombre: str
+        -horasSemanales: int
+        -observacion: str
+    }
+
+    class Grupo {
+        -nombre: str
+        -descripcion: str
+        -codigo: str
+    }
+
+    ' Relaciones dentro del paquete Gestión
+    Cargo "1" -- "1" CategoriaCargo
+}
+
+' Relaciones entre paquetes
+Departamento "1" -- "0..*" Materia
+Plan "1" -- "0..*" Materia
+Materia "1" -- "0..*" Clase
+Materia "1" -- "0..*" Evaluacion
+Materia "1" -- "0..*" Material
+Materia "1" -- "0..*" Formulario
+Materia "1" -- "0..*" Examen
+Clase "1" -- "0..*" Asistencia
+
+Alumno "0..*" -- "0..*" Materia : se inscribe
+Profesor "1..*" -- "0..*" Materia : dicta
+Alumno "1" -- "0..*" Inscripcion : realiza
+Inscripcion "0..*" -- "1" Materia : corresponde a
+Alumno "1" -- "0..*" Asistencia : registrada a
+Alumno "1" -- "0..*" Calificacion : recibe
+Evaluacion "1" -- "0..*" Calificacion : genera
+Alumno "1" -- "0..*" Analitico : solicita
+Profesor "1" -- "0..*" Material : publica
+Profesor "1" -- "0..*" Formulario : crea
+Alumno "0..*" -- "0..*" Examen : se inscribe
+Materia "1" -- "0..*" Grupo : organizada en
+Profesor "1" -- "1" TipoDedicacion : tiene asignado
+Administrativo "1" -- "1" Cargo : ocupa
+Autoridad "1" -- "1" Cargo : desempeña
+@enduml

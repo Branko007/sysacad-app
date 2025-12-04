@@ -4,6 +4,7 @@ import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
 import usuariosRouter from './routes/usuarios.routes.js';
 import analiticosRouter from './routes/analiticos.routes.js';
+import personasRouter from './routes/personas.routes.js';
 import alumnoRoutes from './routes/alumnos.routes.js';
 import authRoutes from './routes/auth.routes.js';
 
@@ -17,6 +18,7 @@ app.use(morgan('dev'));
 app.use('/api/auth', authRoutes)
 app.use('/api/usuarios', usuariosRouter);
 app.use('/api/analiticos', analiticosRouter);
+app.use('/api/personas', personasRouter);
 app.use('/api', alumnoRoutes);
 
 app.get('/', (_req, res) => res.send('Sistema Académico en funcionamiento'));

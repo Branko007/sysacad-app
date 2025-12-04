@@ -348,28 +348,6 @@ app.listen(PORT, () => {
   });  
 ```
 
-Dentro de `src/config/db.js` agregamos el siguiente contenido:
-
-```jsx
-import { Sequelize } from 'sequelize';
-import dotenv from 'dotenv';
-dotenv.config();
-
-const sequelize = new Sequelize(
-  process.env.DB_NAME,
-  process.env.DB_USER,
-  process.env.DB_PASSWORD,
-  {
-    host: process.env.DB_HOST,
-    dialect: 'postgres',
-    port: process.env.DB_PORT,
-    logging: false
-  }
-);
-
-export default sequelize;
-```
-
 ---
 
 📝 Descripción:
@@ -1445,3 +1423,28 @@ Hemos completado la implementación de un sistema de autenticación seguro y esc
 - ✅ **Calidad**: Tests automatizados que garantizan el funcionamiento correcto de los flujos críticos.
 
 Este backend está listo para ser consumido por un frontend (React, Angular, etc.) de manera segura.
+
+## 🛠️ 7. Creación de Tablas en Base de Datos
+
+Para que el sistema funcione correctamente con la base de datos real (PostgreSQL), es necesario crear las tablas correspondientes a los modelos definidos en Sequelize.
+
+Hemos creado un script de utilidad para facilitar esta tarea.
+
+### 7.1 Script de Sincronización
+
+El script se encuentra en `src/scripts/sync-db.js` y se encarga de:
+1. Conectarse a la base de datos.
+2. Sincronizar los modelos definidos (como `Persona`, `Usuario`, etc.) con la base de datos.
+3. Crear o actualizar las tablas automáticamente.
+
+### 7.2 Ejecución
+
+Para ejecutar la sincronización, corre el siguiente comando en tu terminal:
+
+```bash
+node src/scripts/sync-db.js
+```
+
+Si la ejecución es exitosa, verás un mensaje indicando que la base de datos ha sido sincronizada.
+
+> ⚠️ **Nota**: Este script utiliza `sequelize.sync({ alter: true })`, lo que intenta ajustar las tablas existentes a los modelos sin borrar datos. Sin embargo, siempre es recomendable tener precaución al ejecutar operaciones de DDL (Data Definition Language) en bases de datos con información importante.
