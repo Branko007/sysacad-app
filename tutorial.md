@@ -1266,3 +1266,182 @@ Con esto tenemos:
 - **Controlador** delgado,
 - **Ruta** limpia con **validadores**,
 - **Entidad/DTO** para controlar lo que devolvés (sin password).
+
+## 🔐 5. Implementación de Autenticación y Seguridad
+
+En esta sección implementamos un sistema de autenticación robusto utilizando **JWT (JSON Web Tokens)** y **Cookies HttpOnly**. Esto asegura que el cliente pueda mantener una sesión segura sin exponer el token a ataques XSS (Cross-Site Scripting).
+
+### 5.1 Rutas de Autenticación (Login y Logout)
+
+Creamos el archivo `src/routes/auth.routes.js` para manejar el inicio y cierre de sesión.
+
+**Características clave:**
+- **Login (`POST /login`)**:
+    - Verifica email y contraseña (usando `bcrypt.compare`).
+    - Genera un JWT con los datos del usuario.
+    - Envía el token en una cookie `httpOnly` (no accesible desde JavaScript del navegador).
+- **Logout (`POST /logout`)**:
+    - Limpia la cookie `jwtSysacad` para cerrar la sesión.
+
+```javascript
+// src/routes/auth.routes.js
+import { Router } from 'express';
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
+import Usuario from '../models/Usuario.js';
+import { env } from '../config/env.js';
+
+const router = Router();
+
+router.post('/login', async (req, res) => {
+  let { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({ error: 'Email y contraseña son obligatorios' });
+  }
+
+  email = String(email).trim().toLowerCase();
+
+  try {
+    const usuario = await Usuario.findOne({
+      where: { email },
+      attributes: ['id', 'nombre', 'email', 'password', 'rol'],
+    });
+
+    if (!usuario) return res.status(401).json({ error: 'Credenciales inválidas' });
+
+    const ok = await bcrypt.compare(password, usuario.password);
+    if (!ok) return res.status(401).json({ error: 'Credenciales inválidas' });
+
+    // Generar JWT
+    const token = jwt.sign(
+      { id: usuario.id, nombre: usuario.nombre, email: usuario.email, rol: usuario.rol },
+      env.jwt.secret,
+      { expiresIn: '1h', issuer: 'sysacad' }
+    );
+
+    // Enviar token en cookie httpOnly
+    res.cookie('jwtSysacad', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 60 * 60 * 1000, // 1 hora
+    });
+
+    return res.status(200).json({ mensaje: 'Login exitoso' });
+  } catch (error) {
+    console.error('Error en login:', error);
+    return res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+router.post('/logout', (_req, res) => {
+  res.clearCookie('jwtSysacad', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/'
+  });
+  return res.status(200).json({ mensaje: 'Logout exitoso' });
+});
+
+export default router;
+```
+
+### 5.2 Middleware de Autenticación
+
+Para proteger las rutas, creamos un middleware que intercepta las peticiones y verifica la presencia y validez del token JWT en la cookie.
+
+```javascript
+// src/middlewares/auth.middleware.js
+import jwt from 'jsonwebtoken';
+import { env } from '../config/env.js';
+
+export const authenticateToken = (req, res, next) => {
+  const token = req.cookies.jwtSysacad;
+
+  if (!token) {
+    return res.status(401).json({ error: 'Acceso denegado: Token no proporcionado' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, env.jwt.secret);
+    req.user = decoded; // Adjuntamos los datos del usuario al request
+    next();
+  } catch (error) {
+    console.error('Error verificando token:', error.message);
+    return res.status(403).json({ error: 'Token inválido o expirado' });
+  }
+};
+```
+
+### 5.3 Protección de Rutas de Usuarios
+
+Aplicamos el middleware `authenticateToken` en `src/routes/usuarios.routes.js` para que todas las operaciones sobre usuarios requieran estar logueado.
+
+```javascript
+// src/routes/usuarios.routes.js
+import { Router } from 'express';
+import { authenticateToken } from '../middlewares/auth.middleware.js';
+// ... otros imports
+
+const router = Router();
+
+// Aplicar middleware a todas las rutas de este router
+router.use(authenticateToken);
+
+router.get('/', asyncHandler(listarUsuarios));
+// ... resto de las rutas
+```
+
+### 5.4 Configuración en `app.js`
+
+Es fundamental agregar `cookie-parser` en `app.js` para que Express pueda leer las cookies entrantes.
+
+```javascript
+// src/app.js
+import cookieParser from 'cookie-parser';
+// ...
+app.use(cookieParser());
+app.use('/api/auth', authRoutes);
+// ...
+```
+
+### 5.5 Testing de Seguridad
+
+Implementamos tests para verificar que el sistema de seguridad funcione correctamente.
+
+**Test de Rutas Protegidas (`src/tests/routes/protected.routes.test.js`):**
+Verifica que:
+1.  El acceso sin token devuelve `401 Unauthorized`.
+2.  El acceso con token inválido devuelve `403 Forbidden`.
+3.  El acceso con token válido permite la operación (`200 OK`).
+4.  El logout limpia correctamente la cookie.
+
+```javascript
+// Ejemplo simplificado del test
+test('401 si se accede a /api/usuarios sin token', async () => {
+  const res = await request(app).get('/api/usuarios');
+  expect(res.status).toBe(401);
+});
+
+test('Logout limpia la cookie', async () => {
+  const res = await request(app).post('/api/auth/logout');
+  const cookies = res.headers['set-cookie'];
+  expect(cookies[0]).toMatch(/jwtSysacad=;/); // Verifica que la cookie expira
+});
+```
+
+Con esta implementación, hemos asegurado que solo los usuarios autenticados puedan interactuar con los recursos protegidos del sistema.
+
+## 🎯 6. Conclusión
+
+Hemos completado la implementación de un sistema de autenticación seguro y escalable.
+
+**Logros alcanzados:**
+- ✅ **Seguridad**: Uso de `bcrypt` para contraseñas y `JWT` en cookies `httpOnly` para sesiones.
+- ✅ **Arquitectura Limpia**: Separación de responsabilidades en rutas, controladores, servicios y repositorios.
+- ✅ **Calidad**: Tests automatizados que garantizan el funcionamiento correcto de los flujos críticos.
+
+Este backend está listo para ser consumido por un frontend (React, Angular, etc.) de manera segura.

@@ -56,4 +56,14 @@ router.post('/login', async (req, res) => {
   }
 });
 
+router.post('/logout', (_req, res) => {
+  res.clearCookie('jwtSysacad', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/'
+  });
+  return res.status(200).json({ mensaje: 'Logout exitoso' });
+});
+
 export default router;

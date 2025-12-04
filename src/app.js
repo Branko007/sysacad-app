@@ -1,6 +1,7 @@
 // src/app.js
 import express from 'express';
 import morgan from 'morgan';
+import cookieParser from 'cookie-parser';
 import usuariosRouter from './routes/usuarios.routes.js';
 import analiticosRouter from './routes/analiticos.routes.js';
 import alumnoRoutes from './routes/alumnos.routes.js';
@@ -10,6 +11,7 @@ import authRoutes from './routes/auth.routes.js';
 
 const app = express();
 app.use(express.json());
+app.use(cookieParser());
 app.use(morgan('dev'));
 
 app.use('/api/auth', authRoutes)
