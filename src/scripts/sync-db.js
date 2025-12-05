@@ -1,7 +1,8 @@
 import sequelize from '../config/db.js';
-import '../models/Persona.js'; // Importar el modelo para que Sequelize lo reconozca
+import '../models/Persona.js';
 import '../models/Alumno.js';
 import '../models/Usuario.js';
+import '../models/Profesor.js';
 
 const syncDB = async () => {
     try {

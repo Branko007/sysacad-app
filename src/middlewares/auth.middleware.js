@@ -17,3 +17,19 @@ export const authenticateToken = (req, res, next) => {
         return res.status(403).json({ error: 'Token inválido o expirado' });
     }
 };
+
+export const authenticate = authenticateToken;
+
+export const authorize = (roles = []) => {
+    return (req, res, next) => {
+        if (!req.user) {
+            return res.status(401).json({ error: 'Usuario no autenticado' });
+        }
+
+        if (roles.length && !roles.includes(req.user.rol)) {
+            return res.status(403).json({ error: 'Acceso denegado: Rol insuficiente' });
+        }
+
+        next();
+    };
+};
