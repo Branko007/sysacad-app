@@ -1,21 +1,33 @@
-// src/entities/usuario.entity.js
-export class UsuarioEntity {
-    constructor({ id, nombre, email, rol }) {
-      this.id = id;
-      this.nombre = nombre;
-      this.email = email;
-      this.rol = rol;
-    }
-  
-    // Fábrica desde modelo Sequelize
-    static fromModel(modelInstance) {
-      const { id, nombre, email, rol } = modelInstance;
-      return new UsuarioEntity({ id, nombre, email, rol });
-    }
-  
-    // Serialización para respuesta
-    toJSON() {
-      return { id: this.id, nombre: this.nombre, email: this.email, rol: this.rol };
-    }
+import { PersonaEntity } from './persona.entity.js';
+
+export class UsuarioEntity extends PersonaEntity {
+  constructor(data) {
+    super(data);
+    this.usuarioId = data.usuarioId || data.id;
+    this.nombreUsuario = data.nombreUsuario;
+    this.rol = data.rol;
+    // Password usually not exposed in entity, but kept if needed for internal logic (careful with toJSON)
   }
-  
+
+  static fromModel(modelInstance) {
+    const personaData = modelInstance.Persona ? modelInstance.Persona.toJSON() : modelInstance;
+
+    const combinedData = {
+      ...personaData,
+      usuarioId: modelInstance.id,
+      nombreUsuario: modelInstance.nombreUsuario,
+      rol: modelInstance.rol
+    };
+
+    return new UsuarioEntity(combinedData);
+  }
+
+  toJSON() {
+    return {
+      ...super.toJSON(),
+      id: this.usuarioId, // Sobrescribimos el id de Persona con el de Usuario
+      nombreUsuario: this.nombreUsuario,
+      rol: this.rol
+    };
+  }
+}

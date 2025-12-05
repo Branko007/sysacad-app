@@ -3,10 +3,11 @@ import { jest } from '@jest/globals';
 import express from 'express';
 import request from 'supertest';
 
-// ⚠️ Mockear el modelo y bcrypt ANTES de importarlos en la ruta
-jest.unstable_mockModule('../../models/Usuario.js', () => ({
-  __esModule: true,
-  default: { findOne: jest.fn() },
+// Mockear el repositorio
+jest.unstable_mockModule('../../repositories/usuario.repository.js', () => ({
+  UsuarioRepository: jest.fn().mockImplementation(() => ({
+    findByEmail: jest.fn(),
+  })),
 }));
 
 jest.unstable_mockModule('bcrypt', () => ({
@@ -14,19 +15,28 @@ jest.unstable_mockModule('bcrypt', () => ({
   default: { compare: jest.fn() },
 }));
 
-// Importar los módulos mockeados y la ruta (con top-level await en ESM)
-const { default: Usuario } = await import('../../models/Usuario.js');
+// Importar los módulos mockeados y la ruta
+const { UsuarioRepository } = await import('../../repositories/usuario.repository.js');
 const { default: bcrypt } = await import('bcrypt');
 const { default: authRouter } = await import('../../routes/auth.routes.js');
 
 describe('POST /auth/login', () => {
   let app;
+  let mockFindByEmail;
 
   beforeAll(() => {
     process.env.JWT_SECRET = 'test-secret';
     app = express();
     app.use(express.json());
     app.use('/auth', authRouter);
+  });
+
+  beforeEach(() => {
+    // Obtener la función mockeada de la instancia del repositorio
+    mockFindByEmail = jest.fn();
+    UsuarioRepository.mockImplementation(() => ({
+      findByEmail: mockFindByEmail
+    }));
   });
 
   afterEach(() => {
@@ -40,23 +50,23 @@ describe('POST /auth/login', () => {
   });
 
   test('401 si el usuario no existe', async () => {
-    Usuario.findOne.mockResolvedValue(null);
+    mockFindByEmail.mockResolvedValue(null);
 
     const res = await request(app)
       .post('/auth/login')
       .send({ email: 'noexiste@example.com', password: 'x' });
 
-    expect(Usuario.findOne).toHaveBeenCalledWith({
-      where: { email: 'noexiste@example.com' },
-      attributes: ['id', 'nombre', 'email', 'password', 'rol'],
-    });
+    expect(mockFindByEmail).toHaveBeenCalledWith('noexiste@example.com');
     expect(res.status).toBe(401);
     expect(res.body.error).toMatch(/Credenciales inválidas/i);
   });
 
   test('401 si la contraseña es inválida', async () => {
-    Usuario.findOne.mockResolvedValue({
-      id: 1, nombre: 'Branko', email: 'branko@example.com', password: 'hash', rol: 'admin',
+    mockFindByEmail.mockResolvedValue({
+      id: 1,
+      password: 'hash',
+      rol: 'admin',
+      Persona: { email: 'branko@example.com' }
     });
     bcrypt.compare.mockResolvedValue(false);
 
@@ -70,8 +80,11 @@ describe('POST /auth/login', () => {
   });
 
   test('200 y setea cookie cuando el login es exitoso', async () => {
-    Usuario.findOne.mockResolvedValue({
-      id: 1, nombre: 'Branko', email: 'branko@example.com', password: 'hash', rol: 'admin',
+    mockFindByEmail.mockResolvedValue({
+      id: 1,
+      password: 'hash',
+      rol: 'admin',
+      Persona: { email: 'branko@example.com' }
     });
     bcrypt.compare.mockResolvedValue(true);
 

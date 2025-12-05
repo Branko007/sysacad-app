@@ -3,6 +3,7 @@ import { Router } from 'express';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import Usuario from '../models/Usuario.js';
+import { UsuarioRepository } from '../repositories/usuario.repository.js';
 import { env } from '../config/env.js';
 
 
@@ -16,34 +17,30 @@ router.post('/login', async (req, res) => {
     return res.status(400).json({ error: 'Email y contraseña son obligatorios' });
   }
 
-  // Normalizar email
-  email = String(email).trim().toLowerCase();
-
   try {
-    // Buscar usuario por email
-    const usuario = await Usuario.findOne({
-      where: { email },
-      attributes: ['id', 'nombre', 'email', 'password', 'rol'],
-    });
+    // Usamos el repositorio para buscar, ya que ahora el email está en Persona
+    const user = await new UsuarioRepository().findByEmail(email);
 
-    // No revelar si falló email o password
-    if (!usuario) return res.status(401).json({ error: 'Credenciales inválidas' });
+    if (!user) {
+      return res.status(401).json({ error: 'Credenciales inválidas' });
+    }
 
-    // Verificar contraseña hasheada
-    const ok = await bcrypt.compare(password, usuario.password);
-    if (!ok) return res.status(401).json({ error: 'Credenciales inválidas' });
-    console.log(`Usuario ${usuario.email} autenticado correctamente`);
-    // Generar JWT
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ error: 'Credenciales inválidas' });
+    }
+
+    // Generar token
     const token = jwt.sign(
-      { id: usuario.id, nombre: usuario.nombre, email: usuario.email, rol: usuario.rol },
+      { id: user.id, rol: user.rol, email: user.Persona.email }, // Usar email de Persona
       env.jwt.secret,
-      { expiresIn: '1h', issuer: 'sysacad' }
+      { expiresIn: '1h' }
     );
 
     // Enviar token en cookie httpOnly
     res.cookie('jwtSysacad', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // true si servís por HTTPS en prod
+      secure: env.nodeEnv === 'production',
       sameSite: 'lax',
       path: '/',
       maxAge: 60 * 60 * 1000, // 1 hora
