@@ -1448,3 +1448,69 @@ node src/scripts/sync-db.js
 Si la ejecuciÃ³n es exitosa, verÃ¡s un mensaje indicando que la base de datos ha sido sincronizada.
 
 > âš ï¸ **Nota**: Este script utiliza `sequelize.sync({ alter: true })`, lo que intenta ajustar las tablas existentes a los modelos sin borrar datos. Sin embargo, siempre es recomendable tener precauciÃ³n al ejecutar operaciones de DDL (Data Definition Language) en bases de datos con informaciÃ³n importante.
+
+##  4. Integración de Microservicios
+
+En esta sección, expandimos la arquitectura de Sysacad integrando un microservicio independiente para el módulo de **Gestión**.
+
+### 4.1 ¿Qué es un Microservicio?
+
+Imagina que en lugar de tener una sola aplicación gigante que hace todo (Monolito), dividimos el sistema en pequeñas aplicaciones independientes que se comunican entre sí. Cada una se encarga de una tarea específica.
+
+En nuestro caso:
+- **Sysacad App (Monolito)**: Maneja alumnos, profesores, materias, etc.
+- **Gestion Service (Microservicio)**: Se encarga exclusivamente de Cargos, Categorías y Dedicaciones.
+
+### 4.2 El Rol de Traefik (El Agente de Tránsito)
+
+Para que el usuario no tenga que recordar puertos extraños (como localhost:3001, localhost:3002), usamos **Traefik**.
+
+Traefik actúa como un **Reverse Proxy** (un intermediario). Recibe todas las peticiones en el puerto 80 y, según el nombre de dominio, las redirige al servicio correcto:
+
+- Peticiones a gestion.localhost -> Van al contenedor gestion-service.
+- Peticiones a localhost (o cualquier otro) -> Podrían ir a la app principal (si la configuramos así).
+
+### 4.3 Implementación Realizada
+
+1.  **Nuevo Servicio**: Creamos una app Node.js + Express + Sequelize en microservices/gestion-service.
+2.  **Dockerización**: Creamos un Dockerfile para empaquetar este servicio.
+3.  **Orquestación**: Editamos docker-compose.yml para:
+    -   Agregar el servicio 	raefik en los puertos 8090 (web) y 8091 (dashboard). *Nota: Usamos estos puertos para evitar conflictos con otros servicios como Airflow.*
+    -   Agregar el servicio gestion-service.
+    -   Configurar una red compartida mired para que todos se vean entre sí.
+
+### 4.4 Verificación y Pruebas
+
+Para probar que todo funciona, no necesitamos interfaz gráfica todavía. Usamos la terminal y el comando curl para hacer peticiones HTTP directas.
+
+**1. Verificar que el servicio responde (Health Check):**
+
+`powershell
+curl.exe -H 'Host: gestion.localhost' http://localhost:8090/
+`
+
+*Explicación:* Le pedimos a localhost:8090 (Traefik) que nos conecte con gestion.localhost.
+*Resultado esperado:* Un mensaje JSON de bienvenida.
+
+**2. Crear una Categoría (POST):**
+
+`powershell
+# Primero creamos un archivo temporal con los datos (para evitar problemas de comillas en Windows)
+echo '{ "nombre": "Docente", "nivel": 1, "descripcion": "Categoria docente" }' > temp_cat.json
+
+# Enviamos la petición
+curl.exe -X POST -H 'Host: gestion.localhost' -H 'Content-Type: application/json' -d '@temp_cat.json' http://localhost:8090/api/gestion/categorias
+`
+
+*Explicación:* Enviamos datos JSON para crear una nueva categoría en la base de datos.
+
+**3. Consultar Cargos (GET):**
+
+`powershell
+curl.exe -H 'Host: gestion.localhost' http://localhost:8090/api/gestion/cargos
+`
+
+*Explicación:* Pedimos la lista de cargos. El servicio consulta a PostgreSQL y nos devuelve el JSON.
+
+---
+

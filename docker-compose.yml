@@ -1,6 +1,20 @@
 version: '3.8'
 
 services:
+  traefik:
+    image: traefik:v2.10
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "8090:80"
+      - "8091:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - mired
+
   db:
     image: postgres:15
     container_name: sysacad-app
@@ -13,6 +27,29 @@ services:
       - "5433:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    networks:
+      - mired
+
+  gestion-service:
+    build: ./microservices/gestion-service
+    container_name: gestion-service
+    restart: always
+    environment:
+      DB_HOST: db
+      DB_NAME: sysacad
+      DB_USER: postgres_user
+      DB_PASSWORD: postgres_user
+      PORT: 3001
+    networks:
+      - mired
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.gestion.rule=Host(`gestion.localhost`)"
+      - "traefik.http.services.gestion.loadbalancer.server.port=3001"
 
 volumes:
   pgdata:
+
+networks:
+  mired:
+    name: mired

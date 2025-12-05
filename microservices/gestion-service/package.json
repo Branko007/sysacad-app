@@ -1,0 +1,23 @@
+{
+    "name": "gestion-service",
+    "version": "1.0.0",
+    "description": "Microservicio de Gestión para SysAcad",
+    "main": "src/index.js",
+    "type": "module",
+    "scripts": {
+        "start": "node src/index.js",
+        "dev": "nodemon src/index.js"
+    },
+    "dependencies": {
+        "express": "^4.18.2",
+        "sequelize": "^6.37.0",
+        "pg": "^8.11.0",
+        "pg-hstore": "^2.3.4",
+        "dotenv": "^16.0.0",
+        "morgan": "^1.10.0",
+        "cors": "^2.8.5"
+    },
+    "devDependencies": {
+        "nodemon": "^3.0.0"
+    }
+}
