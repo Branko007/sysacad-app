@@ -46,6 +46,15 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.gestion.rule=Host(`gestion.localhost`)"
       - "traefik.http.services.gestion.loadbalancer.server.port=3001"
+      # Middleware: Rate Limit (10 req/s, burst 5)
+      - "traefik.http.middlewares.gestion-ratelimit.ratelimit.average=10"
+      - "traefik.http.middlewares.gestion-ratelimit.ratelimit.burst=5"
+      # Middleware: Retry (3 intentos)
+      - "traefik.http.middlewares.gestion-retry.retry.attempts=3"
+      # Middleware: Circuit Breaker (Corta si 50% de respuestas son error 500)
+      - "traefik.http.middlewares.gestion-cb.circuitbreaker.expression=ResponseCodeRatio(500, 600, 0, 600) > 0.5"
+      # Aplicar los middlewares al router
+      - "traefik.http.routers.gestion.middlewares=gestion-ratelimit,gestion-retry,gestion-cb"
 
 volumes:
   pgdata:

@@ -1514,3 +1514,40 @@ curl.exe -H 'Host: gestion.localhost' http://localhost:8090/api/gestion/cargos
 
 ---
 
+
+##  5. Patrones de Resiliencia y Microservicios
+
+Para hacer nuestro sistema más robusto, hemos implementado tres patrones fundamentales de microservicios utilizando **Traefik**. Esto significa que no tuvimos que modificar nuestro código Node.js, ¡Traefik lo maneja por nosotros!
+
+### 5.1 ¿Qué implementamos?
+
+1.  **Rate Limit (Límite de Velocidad)**
+    *   **Concepto**: Evita que un usuario sature el sistema enviando demasiadas peticiones.
+    *   **Configuración**: Máximo 10 peticiones por segundo.
+    *   **Efecto**: Si te pasas, recibirás un error \429 Too Many Requests\.
+
+2.  **Retry (Reintento Automático)**
+    *   **Concepto**: Si una petición falla por un error momentáneo de red, se vuelve a intentar automáticamente.
+    *   **Configuración**: Hasta 3 intentos.
+    *   **Efecto**: El usuario ni se entera de que hubo un micro-corte, el sistema se recupera solo.
+
+3.  **Circuit Breaker (Cortacircuitos)**
+    *   **Concepto**: Si el servicio empieza a fallar mucho (ej. se cayó la base de datos), el "fusible" salta y deja de enviarle tráfico para evitar un efecto dominó.
+    *   **Configuración**: Si el 50% de las respuestas son errores (500), se abre el circuito.
+    *   **Efecto**: Traefik devuelve \503 Service Unavailable\ inmediatamente, dando tiempo al servicio para recuperarse.
+
+### 5.2 ¿Cómo se configura?
+
+Todo esto se define en el \docker-compose.yml\ usando **Labels** de Traefik:
+
+\\\yaml
+labels:
+  - "traefik.http.middlewares.gestion-ratelimit.ratelimit.average=10"
+  - "traefik.http.middlewares.gestion-retry.retry.attempts=3"
+  - "traefik.http.middlewares.gestion-cb.circuitbreaker.expression=ResponseCodeRatio(500, 600, 0, 600) > 0.5"
+\\\
+
+¡Así de fácil convertimos un servicio básico en uno resiliente y preparado para producción!
+
+---
+

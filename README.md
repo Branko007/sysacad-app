@@ -158,14 +158,51 @@ npm test
 ---
 
 ### 🧱 Microservicio de Gestión
-Este servicio corre en un contenedor separado y gestiona datos auxiliares.
-**URL Base**: `http://gestion.localhost` (vía Traefik) o puerto `3001` directo si está expuesto.
+Este servicio corre en un contenedor separado y gestiona datos auxiliares como Cargos, Categorías y Dedicaciones.
+
+**Acceso**: El servicio es accesible a través del Reverse Proxy **Traefik**.
+
+- **URL Base**: `http://gestion.localhost:8090`
+- **Health Check**: `GET http://gestion.localhost:8090/`
+
+**Endpoints Disponibles**:
 
 | Método | Endpoint | Descripción |
 |--------|----------|-------------|
 | GET | `/api/gestion/cargos` | Listar cargos docentes |
+| POST | `/api/gestion/cargos` | Crear un cargo |
 | GET | `/api/gestion/categorias` | Listar categorías |
+| POST | `/api/gestion/categorias` | Crear una categoría |
 | GET | `/api/gestion/dedicaciones` | Listar dedicaciones |
+
+**Ejemplo de Consulta (PowerShell/Terminal):**
+
+```bash
+# Verificar estado del servicio
+curl.exe -H "Host: gestion.localhost" http://localhost:8090/
+
+# Listar Cargos
+curl.exe -H "Host: gestion.localhost" http://localhost:8090/api/gestion/cargos
+```
+
+> **Nota Importante**: Asegúrate de usar el puerto `8090` y el header `Host: gestion.localhost` para que Traefik enrute correctamente la petición al contenedor del microservicio.
+
+### 🛡️ Patrones de Resiliencia (Microservicios)
+El microservicio implementa patrones de diseño robustos gestionados automáticamente por **Traefik** (sin modificar el código del servicio):
+
+1.  **Rate Limit (Límite de Tasa)**:
+    -   Protege contra saturación de tráfico.
+    -   **Límite**: 10 peticiones/segundo (promedio).
+    -   **Respuesta**: `429 Too Many Requests` si se excede.
+
+2.  **Retry (Reintento)**:
+    -   Maneja fallos transitorios de red.
+    -   **Configuración**: Reintenta automáticamente hasta **3 veces** antes de fallar.
+
+3.  **Circuit Breaker (Cortacircuitos)**:
+    -   Evita fallos en cascada cuando el servicio está degradado.
+    -   **Condición**: Se activa si >50% de las respuestas son errores (500).
+    -   **Acción**: Corta el tráfico temporalmente devolviendo `503 Service Unavailable`.
 
 ---
 
