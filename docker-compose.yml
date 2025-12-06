@@ -30,6 +30,15 @@ services:
     networks:
       - mired
 
+  redis:
+    image: redis:alpine
+    container_name: sysacad-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - mired
+
   gestion-service:
     build: ./microservices/gestion-service
     container_name: gestion-service
@@ -40,6 +49,8 @@ services:
       DB_USER: postgres_user
       DB_PASSWORD: postgres_user
       PORT: 3001
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
     networks:
       - mired
     labels:

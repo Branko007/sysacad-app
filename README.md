@@ -203,6 +203,18 @@ El microservicio implementa patrones de diseño robustos gestionados automática
     -   Evita fallos en cascada cuando el servicio está degradado.
     -   **Condición**: Se activa si >50% de las respuestas son errores (500).
     -   **Acción**: Corta el tráfico temporalmente devolviendo `503 Service Unavailable`.
+    
+###  Cache de Objetos (Redis)
+Para optimizar el rendimiento y reducir la carga en la base de datos, hemos integrado **Redis**.
+
+- **Lectura (\GET /cargos\)**:
+    1.  Consulta primero a Redis.
+    2.  Si existe (Cache Hit), devuelve los datos instantaneamente.
+    3.  Si no existe (Cache Miss), consulta a PostgreSQL, guarda en Redis (TTL 1h) y devuelve.
+- **Escritura (\POST /cargos\)**:
+    1.  Guarda en PostgreSQL.
+    2.  Invalida (borra) la cache en Redis para asegurar consistencia.
+
 
 ---
 
@@ -219,3 +231,4 @@ El microservicio implementa patrones de diseño robustos gestionados automática
     - **Profesor**: `profesor@sysacad.com` / `12345678`
     - **Alumno**: `alumno@sysacad.com` / `12345678`
 - **Lógica**: Verifica si el usuario ya existe por email antes de crearlo para evitar duplicados.
+

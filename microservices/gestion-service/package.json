@@ -15,7 +15,8 @@
         "pg-hstore": "^2.3.4",
         "dotenv": "^16.0.0",
         "morgan": "^1.10.0",
-        "cors": "^2.8.5"
+        "cors": "^2.8.5",
+        "redis": "^4.6.10"
     },
     "devDependencies": {
         "nodemon": "^3.0.0"
