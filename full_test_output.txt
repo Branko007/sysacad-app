@@ -1,0 +1,289 @@
+﻿
+> sysacad-app@1.0.0 test
+> node --experimental-vm-modules node_modules/jest/bin/jest.js
+
+node.exe : (node:89492) 
+ExperimentalWarning: VM Modules 
+is an experimental feature and 
+might change at any time
+En línea: 1 Carácter: 1
++ & "C:\Program 
+Files\nodejs/node.exe" 
+"C:\Program Files\nodejs/node_mo 
+...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~
+    + CategoryInfo          : No 
+   tSpecified: ((node:89492) Ex  
+  ...nge at any time:String) [   
+ ], RemoteException
+    + FullyQualifiedErrorId : Na 
+   tiveCommandError
+ 
+(Use `node --trace-warnings ...` 
+to show where the warning was 
+created)
+FAIL src/tests/routes/auth.routes
+.test.js
+  ÔùÅ Console
+
+    console.log
+      [dotenv@17.2.1] injecting 
+env (0) from .env -- tip: ÔÜÖ´©Å 
+ enable debug logging with { 
+debug: true }
+
+      at _log (node_modules/doten
+v/lib/main.js:139:11)
+
+    console.error
+      Error en login: Error: 
+secretOrPrivateKey must have a 
+value
+          at 
+Object.module.exports [as sign] 
+(C:\Users\Agustin Giorlando\OneDr
+ive\Escritorio\desarrollo softwar
+e\sysacad-app\node_modules\jsonwe
+btoken\sign.js:111:20)
+          at C:\Users\Agustin Gio
+rlando\OneDrive\Escritorio\desarr
+ollo software\sysacad-app\src\rou
+tes\auth.routes.js:34:23
+          at 
+processTicksAndRejections (node:i
+nternal/process/task_queues:103:5
+)
+
+    [0m [90m 49 |[39m     
+[36mreturn[39m res[33m.[39mst
+atus([35m200[39m)[33m.[39mjso
+n({ mensaje[33m:[39m 
+[32m'Login exitoso'[39m 
+})[33m;[39m
+     [90m 50 |[39m   } 
+[36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 51 
+|[39m     console[33m.[39merro
+r([32m'Error en 
+login:'[39m[33m,[39m 
+error)[33m;[39m
+     [90m    |[39m             
+[31m[1m^[22m[39m
+     [90m 52 |[39m     
+[36mreturn[39m res[33m.[39mst
+atus([35m500[39m)[33m.[39mjso
+n({ error[33m:[39m [32m'Error 
+interno del servidor'[39m 
+})[33m;[39m
+     [90m 53 |[39m   }
+     [90m 54 |[39m 
+})[33m;[39m[0m
+
+      at 
+src/routes/auth.routes.js:51:13
+
+  ÔùÅ POST /auth/login ÔÇ║ 200 y 
+setea cookie cuando el login es 
+exitoso
+
+    
+expect(received).toBe(expected) 
+// Object.is equality
+
+    Expected: 200
+    Received: 500
+
+    [0m [90m 93 |[39m       
+[33m.[39msend({ 
+email[33m:[39m [32m'branko@exa
+mple.com'[39m[33m,[39m 
+password[33m:[39m 
+[32m'correcta'[39m 
+})[33m;[39m
+     [90m 94 |[39m
+    [31m[1m>[22m[39m[90m 95 
+|[39m     expect(res[33m.[39ms
+tatus)[33m.[39mtoBe([35m200[3
+9m)[33m;[39m
+     [90m    |[39m             
+           [31m[1m^[22m[39m
+     [90m 96 |[39m     expect(r
+es[33m.[39mbody[33m.[39mmensa
+je)[33m.[39mtoMatch([35m/Login
+ exitoso/i[39m)[33m;[39m
+     [90m 97 |[39m
+     [90m 98 |[39m     
+[36mconst[39m cookies 
+[33m=[39m res[33m.[39mheaders
+[[32m'set-cookie'[39m] 
+[33m||[39m [][33m;[39m[0m
+
+      at Object.<anonymous> (src/
+tests/routes/auth.routes.test.js:
+95:24)
+
+FAIL src/tests/config/db.test.js
+  ÔùÅ Console
+
+    console.log
+      [dotenv@17.2.1] injecting 
+env (0) from .env -- tip: ƒøá´©Å 
+ run anywhere with `dotenvx run 
+-- yourcommand`
+
+      at _log (node_modules/doten
+v/lib/main.js:139:11)
+
+  ÔùÅ Conexi├│n a la base de 
+datos ÔÇ║ SELECT 1+1 = 2
+
+    
+SequelizeConnectionRefusedError:
+
+      at 
+Client._connectionCallback (node_
+modules/sequelize/src/dialects/po
+stgres/connection-manager.js:184:
+24)
+      at Client._handleErrorWhile
+Connecting (node_modules/pg/lib/c
+lient.js:336:19)
+      at 
+Client._handleErrorEvent (node_mo
+dules/pg/lib/client.js:346:19)
+      at 
+Socket.reportStreamError (node_mo
+dules/pg/lib/connection.js:57:12)
+
+PASS 
+src/tests/routes/server.test.js
+  ÔùÅ Console
+
+    console.log
+      [dotenv@17.2.1] injecting 
+env (0) from .env -- tip: ƒöÉ 
+prevent building .env in docker: 
+https://dotenvx.com/prebuild
+
+      at _log (node_modules/doten
+v/lib/main.js:139:11)
+
+[0mGET / [32m200[0m 1.219 ms - 36[0m
+PASS src/tests/routes/profesores.
+routes.test.js
+PASS src/tests/routes/usuarios.ro
+utes.test.js
+PASS src/tests/routes/alumnos.rou
+tes.test.js
+PASS src/tests/routes/facultades.
+routes.test.js
+PASS src/tests/services/profesor.
+service.test.js
+  ÔùÅ Console
+
+    console.log
+      [dotenv@17.2.1] injecting 
+env (0) from .env -- tip: ƒöÉ 
+prevent committing .env to code: 
+https://dotenvx.com/precommit
+
+      at _log (node_modules/doten
+v/lib/main.js:139:11)
+
+PASS src/tests/services/usuario.s
+ervice.test.js
+  ÔùÅ Console
+
+    console.log
+      [dotenv@17.2.1] injecting 
+env (0) from .env -- tip: ƒøá´©Å 
+ run anywhere with `dotenvx run 
+-- yourcommand`
+
+      at _log (node_modules/doten
+v/lib/main.js:139:11)
+
+    console.log
+      Service: listar called
+
+      at UsuarioService.listar (s
+rc/services/usuario.service.js:13
+:13)
+
+    console.log
+      Service: rows found: [
+        {
+          id: 1,
+          nombreUsuario: 'test',
+          rol: 'admin',
+          Persona: { toJSON: 
+[Function: toJSON] }
+        }
+      ]
+
+      at UsuarioService.listar (s
+rc/services/usuario.service.js:16
+:15)
+
+PASS src/tests/services/facultad.
+service.test.js
+  ÔùÅ Console
+
+    console.log
+      [dotenv@17.2.1] injecting 
+env (0) from .env -- tip: ÔÜÖ´©Å 
+ suppress all logs with { quiet: 
+true }
+
+      at _log (node_modules/doten
+v/lib/main.js:139:11)
+
+PASS src/tests/services/alumno.se
+rvice.test.js
+  ÔùÅ Console
+
+    console.log
+      [dotenv@17.2.1] injecting 
+env (0) from .env -- tip: ÔÜÖ´©Å 
+ specify custom .env file path 
+with { path: '/custom/path/.env' 
+}
+
+      at _log (node_modules/doten
+v/lib/main.js:139:11)
+
+PASS src/tests/services/persona.s
+ervice.test.js
+  ÔùÅ Console
+
+    console.log
+      [dotenv@17.2.1] injecting 
+env (0) from .env -- tip: ƒôí 
+auto-backup env with Radar: 
+https://dotenvx.com/radar
+
+      at _log (node_modules/doten
+v/lib/main.js:139:11)
+
+PASS src/tests/routes/personas.ro
+utes.test.js
+PASS 
+src/tests/entities/alumno.test.js
+PASS src/tests/entities/materia.t
+est.js
+PASS src/tests/entities/usuario.t
+est.js
+PASS src/tests/entities/universid
+ad.test.js
+PASS src/tests/entities/facultad.
+test.js
+
+Test Suites: 2 failed, 16 
+passed, 18 total
+Tests:       2 failed, 60 
+passed, 62 total
+Snapshots:   0 total
+Time:        4.842 s
+Ran all test suites.

@@ -1,0 +1,95 @@
+﻿
+> sysacad-app@1.0.0 test
+> node --experimental-vm-modules node_modules/jest/bin/jest.js src/tests/routes/facultades.routes.test.js
+
+node.exe : (node:87640) 
+ExperimentalWarning: VM Modules 
+is an experimental feature and 
+might change at any time
+En línea: 1 Carácter: 1
++ & "C:\Program 
+Files\nodejs/node.exe" 
+"C:\Program Files\nodejs/node_mo 
+...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~
+    + CategoryInfo          : No 
+   tSpecified: ((node:87640) Ex  
+  ...nge at any time:String) [   
+ ], RemoteException
+    + FullyQualifiedErrorId : Na 
+   tiveCommandError
+ 
+(Use `node --trace-warnings ...` 
+to show where the warning was 
+created)
+FAIL src/tests/routes/facultades.
+routes.test.js
+  Facultades Routes
+    ÔêÜ GET /facultades devuelve 
+lista (20 ms)
+    ÔêÜ GET /facultades/:id 
+devuelve facultad si existe (7 
+ms)
+    ÔêÜ GET /facultades/:id 
+devuelve 404 si no existe (4 ms)
+    ÔêÜ POST /facultades crea 
+facultad valida (16 ms)
+    ÔêÜ POST /facultades falla 
+si falta nombre (validacion) (5 
+ms)
+    ÔêÜ POST /facultades falla 
+si nombre duplicado (5 ms)
+    ├ù PUT /facultades/:id 
+actualiza correcto (10 ms)
+    ÔêÜ DELETE /facultades/:id 
+elimina correcto (5 ms)
+    ÔêÜ DELETE /facultades/:id 
+404 si no existe (4 ms)
+
+  ÔùÅ Facultades Routes ÔÇ║ PUT 
+/facultades/:id actualiza 
+correcto
+
+    
+expect(received).toBe(expected) 
+// Object.is equality
+
+    Expected: 200
+    Received: 500
+
+    [0m [90m 110 |[39m        
+     [33m.[39msend({ 
+nombre[33m:[39m 
+[32m'Medicina'[39m 
+})[33m;[39m
+     [90m 111 |[39m
+    [31m[1m>[22m[39m[90m 
+112 |[39m         expect(res[33
+m.[39mstatus)[33m.[39mtoBe([3
+5m200[39m)[33m;[39m
+     [90m     |[39m            
+                
+[31m[1m^[22m[39m
+     [90m 113 |[39m         exp
+ect(res[33m.[39mbody[33m.[39m
+nombre)[33m.[39mtoBe([32m'Medi
+cina'[39m)[33m;[39m
+     [90m 114 |[39m     
+})[33m;[39m
+     [90m 115 |[39m[0m
+
+      at Object.<anonymous> (src/
+tests/routes/facultades.routes.te
+st.js:112:28)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 8 passed, 
+9 total
+Snapshots:   0 total
+Time:        0.673 s, estimated 
+1 s
+Ran all test suites matching src/
+tests/routes/facultades.routes.te
+st.js.

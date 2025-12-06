@@ -7,6 +7,7 @@ import personasRouter from './routes/personas.routes.js';
 import alumnosRouter from './routes/alumnos.routes.js';
 import authRouter from './routes/auth.routes.js';
 import profesoresRouter from './routes/profesores.routes.js';
+import facultadesRouter from './routes/facultades.routes.js';
 
 const app = express();
 
@@ -22,6 +23,7 @@ app.use('/api/alumnos', alumnosRouter);
 app.use('/api/usuarios', usuariosRouter);
 app.use('/api/profesores', profesoresRouter);
 app.use('/api/analiticos', analiticosRouter);
+app.use('/api/facultades', facultadesRouter);
 
 app.get('/', (_req, res) => res.send('Sistema Académico en funcionamiento'));
 
