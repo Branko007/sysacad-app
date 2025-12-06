@@ -4,6 +4,7 @@ import '../models/Alumno.js';
 import '../models/Usuario.js';
 import '../models/Profesor.js';
 import '../models/Materia.js';
+import '../models/Inscripcion.js';
 
 const syncDB = async () => {
     try {
