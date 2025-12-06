@@ -8,6 +8,7 @@ import '../models/Inscripcion.js';
 import '../models/Carrera.js';
 import '../models/Plan.js';
 import '../models/Evaluacion.js';
+import '../models/Calificacion.js';
 
 const syncDB = async () => {
     try {
