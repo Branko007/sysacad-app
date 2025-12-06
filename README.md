@@ -14,6 +14,33 @@ El proyecto destaca por su arquitectura **modular por capas**, uso de **Sequeliz
 
 ---
 
+## 📋 Requerimientos Funcionales
+
+El sistema cumple con las siguientes funcionalidades clave:
+
+1.  **Autenticación y Seguridad**:
+    *   Login y Logout seguro mediante credenciales.
+    *   Generación y validación de tokens JWT.
+    *   Protección de rutas mediante middlewares de autorización.
+    *   Manejo de roles (Admin, Profesor, Alumno).
+
+2.  **Gestión de Usuarios**:
+    *   Alta, Baja y Modificación de usuarios.
+    *   Asignación de roles y permisos.
+
+3.  **Gestión Académica**:
+    *   **Alumnos**: Registro detallado con legajo, fecha de ingreso, cohorte y datos personales.
+    *   **Profesores**: Registro con legajo, especialidad, antigüedad y datos personales.
+
+4.  **Generación de Reportes**:
+    *   Generación dinámica de analíticos en formato PDF para descarga.
+
+5.  **Microservicios Auxiliares (Gestión)**:
+    *   Administración centralizada de Cargos Docentes.
+    *   Gestión de Categorías y Dedicaciones.
+
+---
+
 ## 🏰 Arquitectura del Proyecto
 
 El backend sigue una arquitectura limpia para asegurar mantenibilidad y escalabilidad:
