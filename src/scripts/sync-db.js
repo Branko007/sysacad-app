@@ -7,6 +7,7 @@ import '../models/Materia.js';
 import '../models/Inscripcion.js';
 import '../models/Carrera.js';
 import '../models/Plan.js';
+import '../models/Evaluacion.js';
 
 const syncDB = async () => {
     try {
