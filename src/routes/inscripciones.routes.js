@@ -3,7 +3,7 @@ import { asyncHandler } from '../middlewares/asyncHandler.js';
 import { authenticateToken } from '../middlewares/auth.middleware.js';
 import { validate, inscribirSchema } from '../validators/inscripcion.validator.js';
 import {
-    inscribir, listarPorAlumno, cancelarInscripcion
+    inscribir, listarPorAlumno, cancelarInscripcion, listarInscripciones
 } from '../controllers/inscripcion.controller.js';
 
 const router = Router();
@@ -12,6 +12,7 @@ const router = Router();
 router.use(authenticateToken);
 
 router.post('/', validate(inscribirSchema), asyncHandler(inscribir));
+router.get('/', asyncHandler(listarInscripciones));
 router.get('/alumno/:id', asyncHandler(listarPorAlumno));
 router.delete('/:id', asyncHandler(cancelarInscripcion));
 

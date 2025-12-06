@@ -24,6 +24,10 @@ export class InscripcionService {
         return this.repo.create(data);
     }
 
+    async listarTodas() {
+        return this.repo.findAll();
+    }
+
     async listarPorAlumno(alumnoId) {
         // Validar existencia de alumno opcionalmente, pero findByAlumno simplemente devolvería vacío
         return this.repo.findByAlumno(alumnoId);

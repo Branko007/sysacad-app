@@ -14,6 +14,15 @@ export const inscribir = async (req, res) => {
     }
 };
 
+export const listarInscripciones = async (req, res) => {
+    try {
+        const data = await service.listarTodas();
+        res.json(data);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
 export const listarPorAlumno = async (req, res) => {
     try {
         const data = await service.listarPorAlumno(Number(req.params.id));

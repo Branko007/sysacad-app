@@ -103,6 +103,15 @@ describe('Inscripciones Routes', () => {
         expect(res.body.error).toContain('ya está inscripto');
     });
 
+    // GET /
+    test('GET /inscripciones devuelve lista completa', async () => {
+        Inscripcion.findAll.mockResolvedValue([{ id: 1, alumnoId: 1, materiaId: 1 }]);
+
+        const res = await request(app).get('/inscripciones');
+        expect(res.status).toBe(200);
+        expect(res.body).toHaveLength(1);
+    });
+
     // GET /alumno/:id
     test('GET /inscripciones/alumno/:id devuelve lista', async () => {
         Inscripcion.findAll.mockResolvedValue([{ id: 1, alumnoId: 1, materiaId: 1 }]);
