@@ -1,50 +1,67 @@
 # 🎓 Sysacad App
 
-👨‍💻 **Desarrollado por:**
-
-- Branko Almeira  
-- Federico Sosa  
-- Agustin Giorlando  
-
-Aplicación académica desarrollada en **Node.js** con **Express** y **Sequelize**, conectada a **PostgreSQL** (Docker).  
-El proyecto implementa una arquitectura **modular por capas** que favorece la escalabilidad, mantenibilidad y testabilidad.
+## 👨‍💻 Desarrolladores
+- **Branko Almeira**
+- **Federico Sosa**
+- **Agustin Giorlando**
 
 ---
 
-## 📂 Arquitectura
+## 📖 Descripción
+**Sysacad App** es una plataforma académica robusta desarrollada en **Node.js** con una arquitectura orientada a servicios. El sistema principal gestiona usuarios, alumnos y profesores, mientras que funcionalidades específicas como la gestión de cargos y dedicaciones se manejan a través de microservicios contenerizados.
 
-El código se organiza bajo el principio de **separación de responsabilidades**, siguiendo una arquitectura por capas:
+El proyecto destaca por su arquitectura **modular por capas**, uso de **Sequelize ORM**, base de datos **PostgreSQL**, y orquestación mediante **Docker** y **Traefik**.
+
+---
+
+## 🏰 Arquitectura del Proyecto
+
+El backend sigue una arquitectura limpia para asegurar mantenibilidad y escalabilidad:
 
 ```
 src/
-  config/         # Configuración (ej. conexión a la DB)
-  controllers/    # Controladores HTTP (req/res)
-  entities/       # Entidades/DTOs (representación lógica de dominio)
-  middlewares/    # Middlewares genéricos (auth, manejo de errores, etc.)
-  models/         # Modelos Sequelize (mapeo ORM ↔ DB)
-  repositories/   # Acceso a datos (queries usando los modelos)
-  routes/         # Definición de rutas y vinculación a controladores
-  services/       # Lógica de negocio
-  tests/          # Tests unitarios e integración
+├── config/         # Configuración de entorno y base de datos
+├── controllers/    # Controladores: manejan las peticiones HTTP
+├── entities/       # Entidades de dominio
+├── middlewares/    # Middlewares (Auth, Error Handling, Logging)
+├── models/         # Modelos Sequelize (ORM)
+├── repositories/   # Capa de acceso a datos
+├── routes/         # Definición de endpoints
+├── scripts/        # Scripts de utilidad (Seeders, Sync DB)
+├── services/       # Lógica de negocio pura
+└── tests/          # Tests unitarios e integración
 ```
 
 ---
 
-## 🚀 Tecnologías principales
+## 🚀 Tecnologías
 
-- **Node.js** v20+  
-- **Express.js** (framework web)  
-- **Sequelize ORM**  
-- **PostgreSQL 15** (contenedor Docker)  
-- **Jest + Supertest** (testing)  
-- **Docker Compose** (infraestructura reproducible)  
-- **dotenv** (gestión de configuración)  
+- **Backend Core**: Node.js, Express.js
+- **Base de Datos**: PostgreSQL 15 (Docker)
+- **ORM**: Sequelize
+- **Autenticación**: JWT (Cookies httpOnly)
+- **Infraestructura**: Docker, Docker Compose, Traefik (Reverse Proxy)
+- **Testing**: Jest, Supertest
+- **Microservicios**: Node.js Express Service independiente
 
 ---
 
-## ⚙️ Configuración de entorno
+## 🛠️ Instalación y Puesta en Marcha
 
-El proyecto utiliza un archivo `.env` para parametrizar la conexión a la base de datos y el puerto de la aplicación:
+Sigue estos pasos para levantar el entorno de desarrollo completo.
+
+### 1. Requisitos Previos
+- Node.js v18+
+- Docker y Docker Compose instalados y corriendo.
+
+### 2. Instalación de Dependencias
+Instala las librerías necesarias en la raíz del proyecto:
+```bash
+npm install
+```
+
+### 3. Configuración de Entorno
+Asegúrate de tener un archivo `.env` en la raíz con las siguientes variables (ajusta según tu entorno):
 
 ```env
 PORT=3000
@@ -53,126 +70,115 @@ DB_PORT=5433
 DB_NAME=sysacad
 DB_USER=postgres_user
 DB_PASSWORD=postgres_user
-JWT_SECRET=una_clave_secreta_segura
+JWT_SECRET=tu_clave_secreta_super_segura
+NODE_ENV=development
 ```
 
----
-
-## 🐳 Levantar la base de datos con Docker
+### 4. Levantar Infraestructura (Docker)
+El proyecto utiliza Docker Compose para levantar la base de datos PostgreSQL y los microservicios.
 
 ```bash
 docker compose up -d
 ```
+Esto iniciará:
+- **Base de Datos**: Puerto `5433` (mapeado desde 5432).
+- **Traefik**: Dashboard en `http://localhost:8080`.
+- **Microservicio de Gestión**: Accesible vía Traefik.
 
-Esto levanta un contenedor PostgreSQL en el puerto **5433** de tu host, aislando el servicio de posibles conflictos con instalaciones locales.
+### 5. Configuración de Base de Datos
+Una vez levantado el contenedor de la DB, debes sincronizar las tablas e insertar datos iniciales.
 
----
-
-## 📌 Scripts principales
-
-En `package.json`:
-
-- `npm run dev` → inicia el servidor con nodemon.  
-- `npm start` → inicia el servidor en modo producción.  
-- `npm test` → ejecuta la suite de tests con Jest.  
-
----
-
-## 📡 Endpoints disponibles
-
-**Base URL por defecto:** `http://localhost:3000`  
-
-### 👥 Usuarios
-| Método | Endpoint            | Descripción                               | Body (JSON ejemplo) |
-|--------|---------------------|-------------------------------------------|---------------------|
-| GET    | `/api/usuarios`     | Lista todos los usuarios                  | - |
-| GET    | `/api/usuarios/:id` | Obtiene un usuario por ID                 | - |
-| POST   | `/api/usuarios`     | Crea un nuevo usuario                     | ```{ "nombre": "Juan", "email": "juan@test.com", "password": "ClaveSegura123", "rol": "alumno" }``` |
-| PUT    | `/api/usuarios/:id` | Actualiza datos de un usuario existente   | ```{ "nombre": "Juan Actualizado", "rol": "profesor" }``` |
-| DELETE | `/api/usuarios/:id` | Elimina un usuario por ID                 | - |
-
----
-
-### 📄 Analíticos (PDF)
-
-> Generación on-the-fly de analítico de un alumno en formato **PDF**.  
-> Asegúrate de haber agregado la ruta en `src/app.js`:  
-> `app.use('/api/analiticos', analiticosRouter);`
-
-| Método | Endpoint                          | Descripción                           | Headers / Respuesta |
-|--------|-----------------------------------|---------------------------------------|---------------------|
-| GET    | `/api/analiticos/:alumnoId.pdf`   | Devuelve el Analítico del alumno en PDF | **Response**: `Content-Type: application/pdf` |
-
-**Ejemplos de uso (Postman):**  
-1. Método: `GET`  
-2. URL: `http://localhost:3000/api/analiticos/123.pdf`  
-3. Headers: *(no requiere especiales)*  
-4. **Respuesta**: mostrará/descargará `analitico_123.pdf` (inline).
-
-**Ejemplo cURL:**
+**Paso A: Sincronizar Base de Datos**  
+Este script crea o actualiza las tablas según los modelos definidos.
 ```bash
-curl -X GET "http://localhost:3000/api/analiticos/123.pdf" -o analitico_123.pdf
+node src/scripts/sync-db.js
+```
+> *Nota: Usa `force: true` dentro del script si necesitas borrar y recrear todo desde cero.*
+
+**Paso B: Popular Datos (Seed)**  
+Este script inserta usuarios básicos (Admin, Profesor, Alumno) para pruebas.
+```bash
+node src/scripts/seed-users.js
 ```
 
-> **Notas**
-> - Si el `alumnoId` no existe, el endpoint responde `404 { "error": "Alumno no encontrado" }`.
-> - Si deseas forzar descarga en lugar de inline, cambia el header `Content-Disposition` a `attachment` en el controlador.
-
 ---
 
-## 🔎 Cómo probar con Postman
+## 🏃 Ejecución de la Aplicación
 
-1. **Levantar la app**:  
-   ```bash
-   npm run dev
-   ```
+### Modo Desarrollo
+Inicia el servidor principal con `nodemon` para recarga automática:
+```bash
+npm run dev
+```
 
-2. **Configurar colección en Postman**:  
-   - Crear una nueva colección llamada **Sysacad App**.  
-   - Definir la variable `base_url = http://localhost:3000`.  
+### Modo Producción
+```bash
+npm start
+```
 
-3. **Usuarios — Crear** (POST `{{base_url}}/api/usuarios`)  
-   **Body (raw JSON):**
-   ```json
-   {
-     "nombre": "María López",
-     "email": "maria@example.com",
-     "password": "ClaveSegura123",
-     "rol": "profesor"
-   }
-   ```
-
-4. **Usuarios — Update** (PUT `{{base_url}}/api/usuarios/1`)  
-   **Body:**
-   ```json
-   {
-     "nombre": "María Actualizada",
-     "rol": "admin"
-   }
-   ```
-
-5. **Usuarios — Delete** (DELETE `{{base_url}}/api/usuarios/1`)
-
-6. **Analíticos — Descargar PDF** (GET `{{base_url}}/api/analiticos/123.pdf`)  
-   - Respuesta: PDF del analítico.  
-   - En Postman, pestaña **“Save Response”** para guardar el archivo si lo necesitás.
-
----
-
-## 🧪 Testing
-
-- **Unit tests**: validan la lógica de negocio y servicios con dependencias mockeadas.  
-- **Integration tests**: prueban rutas HTTP completas con base de datos real/efímera.  
-
-Ejecutar:
-
+### Ejecutar Tests
 ```bash
 npm test
 ```
 
 ---
 
-## ✅ Mejoras futuras
+## 📡 Documentación de API
 
-- Implementar autenticación con JWT (cookies httpOnly).  
-- Incorporar más entidades académicas (materias, facultades, inscripciones, calificaciones).  
+### Servicio Principal (`localhost:3000`)
+
+#### 🔐 Autenticación
+| Método | Endpoint | Descripción | Body Requerido |
+|--------|----------|-------------|----------------|
+| POST | `/api/auth/login` | Iniciar sesión | `{ "email": "...", "password": "..." }` |
+| POST | `/api/auth/logout` | Cerrar sesión | - |
+
+#### 👥 Usuarios
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| GET | `/api/usuarios` | Listar usuarios |
+| POST | `/api/usuarios` | Crear usuario |
+| GET | `/api/usuarios/:id` | Ver usuario |
+| PUT | `/api/usuarios/:id` | Editar usuario |
+| DELETE | `/api/usuarios/:id` | Eliminar usuario |
+
+#### 🎓 Alumnos y Profesores
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| GET | `/api/alumnos` | Listar alumnos |
+| POST | `/api/alumnos` | Crear alumno (con persona asociada) |
+| GET | `/api/profesores` | Listar profesores |
+| POST | `/api/profesores` | Crear profesor |
+
+#### 📄 Analíticos
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| GET | `/api/analiticos/:id.pdf` | Descargar analítico en PDF |
+
+---
+
+### 🧱 Microservicio de Gestión
+Este servicio corre en un contenedor separado y gestiona datos auxiliares.
+**URL Base**: `http://gestion.localhost` (vía Traefik) o puerto `3001` directo si está expuesto.
+
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| GET | `/api/gestion/cargos` | Listar cargos docentes |
+| GET | `/api/gestion/categorias` | Listar categorías |
+| GET | `/api/gestion/dedicaciones` | Listar dedicaciones |
+
+---
+
+## 📝 Detalles de Scripts
+
+### `src/scripts/sync-db.js`
+- **Función**: Sincroniza los modelos de Sequelize con la base de datos.
+- **Detalle**: Utiliza `sequelize.sync({ alter: true })` para ajustar las tablas sin perder datos si es posible.
+
+### `src/scripts/seed-users.js`
+- **Función**: Inserta datos de prueba.
+- **Datos generados**:
+    - **Admin**: `admin@sysacad.com` / `12345678`
+    - **Profesor**: `profesor@sysacad.com` / `12345678`
+    - **Alumno**: `alumno@sysacad.com` / `12345678`
+- **Lógica**: Verifica si el usuario ya existe por email antes de crearlo para evitar duplicados.
