@@ -28,4 +28,12 @@ const Materia = sequelize.define('Materia', {
     timestamps: false
 });
 
+import Plan from './Plan.js';
+
+// ... (existing code)
+
+// Relaciones
+Plan.hasMany(Materia, { foreignKey: 'planId' });
+Materia.belongsTo(Plan, { foreignKey: 'planId' });
+
 export default Materia;

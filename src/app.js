@@ -11,6 +11,7 @@ import facultadesRouter from './routes/facultades.routes.js';
 import materiasRouter from './routes/materias.routes.js';
 import inscripcionesRouter from './routes/inscripciones.routes.js';
 import carrerasRouter from './routes/carreras.routes.js';
+import planesRouter from './routes/planes.routes.js';
 
 const app = express();
 
@@ -30,6 +31,7 @@ app.use('/api/facultades', facultadesRouter);
 app.use('/api/materias', materiasRouter);
 app.use('/api/inscripciones', inscripcionesRouter);
 app.use('/api/carreras', carrerasRouter);
+app.use('/api/planes', planesRouter);
 
 app.get('/', (_req, res) => res.send('Sistema Académico en funcionamiento'));
 
