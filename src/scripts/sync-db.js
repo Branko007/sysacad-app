@@ -3,6 +3,7 @@ import '../models/Persona.js';
 import '../models/Alumno.js';
 import '../models/Usuario.js';
 import '../models/Profesor.js';
+import '../models/Materia.js';
 
 const syncDB = async () => {
     try {
