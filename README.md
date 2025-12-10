@@ -232,3 +232,59 @@ Para optimizar el rendimiento y reducir la carga en la base de datos, hemos inte
     - **Alumno**: `alumno@sysacad.com` / `12345678`
 - **Lógica**: Verifica si el usuario ya existe por email antes de crearlo para evitar duplicados.
 
+---
+
+## 📊 Monitoreo y Métricas
+
+### Dashboard de Traefik
+
+El proyecto incluye un dashboard de Traefik para monitorear el estado de los microservicios, routers, services y middlewares.
+
+- **URL**: http://localhost:8091
+- **Puerto**: 8091 (configurado en `docker-compose.yml`)
+
+**Qué puedes ver:**
+- ✅ Estado de routers (gestion-service)
+- ✅ Servicios y réplicas activas
+- ✅ Middlewares aplicados (Rate Limit, Retry, Circuit Breaker)
+- ✅ Configuración de balanceo de carga
+
+### Scripts de Verificación Automatizada
+
+Para facilitar el análisis de métricas, el proyecto incluye scripts de verificación:
+
+**Linux/Mac (Bash):**
+```bash
+chmod +x scripts/verify-metrics.sh
+./scripts/verify-metrics.sh
+```
+
+**Windows (PowerShell):**
+```powershell
+.\scripts\verify-metrics.ps1
+```
+
+Estos scripts verifican automáticamente:
+- ✅ Estado de Traefik, Redis y PostgreSQL
+- ✅ Configuración de routers y services
+- ✅ Middlewares aplicados correctamente
+- ✅ Número de réplicas activas
+- ✅ Funcionamiento del Rate Limit
+- ✅ Caché de Redis operativo
+
+### Documentación Detallada
+
+- **Guía de Métricas de Traefik**: [`docs/traefik-metrics-guide.md`](docs/traefik-metrics-guide.md)
+  - Acceso al dashboard
+  - Interpretación de métricas
+  - Monitoreo de patrones de resiliencia
+  - Troubleshooting
+  - Setup opcional de Prometheus + Grafana
+
+- **Análisis de Pruebas de Carga**: [`metrics_analysis.md`](metrics_analysis.md)
+  - Resultados de pruebas con k6
+  - Análisis de Rate Limit
+  - Impacto del caché de Redis
+  - Métricas de rendimiento
+
+---
