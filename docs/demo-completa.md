@@ -286,21 +286,38 @@ curl http://gestion.localhost:8090/api/gestion/cargos
 ```powershell
 docker-compose logs --tail=10 gestion-service
 ```
-
 **Deberías ver:** `Serving from Cache` ✅
 
 ### 📝 Paso 3: Crear un Cargo (Invalida Caché)
 
+**Windows (PowerShell):**
+
 ```powershell
 # Crear nuevo cargo
-curl -X POST http://gestion.localhost:8090/api/gestion/cargos `
-  -H "Content-Type: application/json" `
+Invoke-WebRequest -Uri "http://localhost:8090/api/gestion/cargos" `
+  -Method POST `
+  -Headers @{"Host"="gestion.localhost"; "Content-Type"="application/json"} `
+  -Body '{"nombre":"Profesor Adjunto","puntos":80,"descripcion":"Cargo de profesor adjunto","categoriaCargoId":1}'
+```
+
+**macOS/Linux (bash/zsh):**
+
+```bash
+# Crear nuevo cargo
+curl -X POST http://localhost:8090/api/gestion/cargos \
+  -H "Host: gestion.localhost" \
+  -H "Content-Type: application/json" \
   -d '{
     "nombre": "Profesor Adjunto",
+    "puntos": 80,
     "descripcion": "Cargo de profesor adjunto",
-    "categoria_cargo_id": 1
+    "categoriaCargoId": 1
   }'
 ```
+
+**Campos obligatorios:**
+- ✅ `nombre` - String
+- ✅ `puntos` - Integer
 
 **Esto invalida el caché automáticamente**
 
