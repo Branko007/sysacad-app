@@ -7,7 +7,8 @@ WORKDIR /app
 COPY package*.json ./
 
 # Instala solo dependencias de producción
-RUN npm ci --only=production
+# Usa npm install en vez de npm ci para mayor flexibilidad
+RUN npm install --production
 
 # Copia el código fuente
 COPY . .
